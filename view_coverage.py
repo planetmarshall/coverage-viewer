@@ -1,5 +1,6 @@
 #! /usr/bin/env python
-
+import itertools
+import os.path
 import sys
 import random
 from argparse import ArgumentParser
@@ -20,6 +21,22 @@ class CoverageView(QtWidgets.QWidget):
 def load_coverage_data(filename: Path) -> dict:
     with open(filename, "r") as fp:
         data = json.load(fp)
+
+def parse_coverage_data(coverage_data: dict) -> dict:
+    def set_node_filelist(data: dict, path: Path):
+        pass
+
+    files_data = coverage_data["data"][0]["files"]
+    filenames = [ data["filename"] for data in files_data]
+    root = os.path.commonprefix(filenames)
+    sorted_filenames = sorted([Path(filename.removeprefix(root)) for filename in filenames])
+    groups = []
+    folders = []
+    for folder, files in itertools.groupby(sorted_filenames, key=lambda filename: filename.parent):
+        folders.append(folder)
+        groups.append(list(files))
+
+    pass
 
 
 def main():
