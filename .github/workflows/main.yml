@@ -18,8 +18,7 @@ jobs:
 
     - name: Run linter
       run: |
-        flake8 view_coverage.py
-        flake8 coverage_tools.py
+        ruff check *.py
 
     - name: Run tests
       run: |

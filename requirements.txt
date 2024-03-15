@@ -1,5 +1,4 @@
-black
 jq
-flake8
 pyside6
 pytest
+ruff
