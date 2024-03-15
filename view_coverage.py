@@ -6,21 +6,17 @@
 # dependencies = ["jq","pyside6"]
 # ///
 
-from fnmatch import fnmatch
-import itertools
 import os.path
 import sys
 from argparse import ArgumentParser
 from math import floor
-from pathlib import Path
-from typing import List, Tuple
+from typing import Tuple
 
-import jq
 from PySide6 import QtWidgets
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QTreeWidgetItem
 
-FILE_DATA_KEY = "_filedata"
+from coverage_tools import FILE_DATA_KEY, load_coverage_data
 
 
 class CoverageView(QtWidgets.QWidget):
@@ -92,49 +88,6 @@ class CoverageView(QtWidgets.QWidget):
         self.tree.addTopLevelItems(root_items)
 
 
-def load_coverage_data(filename: Path) -> dict:
-    with open(filename, "r") as fp:
-        preprocessed_data = jq.compile(
-            ".data.[0].files.[] | {filename: .filename, coverage: .summary.lines.percent}"
-        ).input_text(fp.read())
-        return parse_coverage_data(preprocessed_data)
-
-
-def parse_coverage_data(coverage_data: dict, exclude_pattern: str | None = None) -> dict:
-    def _prefilter_filenames(files):
-        for data in files:
-            filename = data["filename"]
-            if not exclude_pattern or not fnmatch(filename, exclude_pattern):
-                yield data
-            else:
-                continue
-
-    def set_node_filelist(data: dict, path: Path, cov_data: List[dict]):
-        node = data
-        for part in path.parts:
-            if part not in node:
-                node[part] = {}
-            node = node[part]
-        node[FILE_DATA_KEY] = cov_data
-
-    data = list(_prefilter_filenames(coverage_data))
-
-    root = os.path.commonprefix([element["filename"] for element in data])
-
-    def _sort_by_dirname(obj):
-        return os.path.dirname(obj["filename"])
-
-    for element in data:
-        element["filename"] = element["filename"].removeprefix(root)
-
-    sorted_data = sorted(data, key=_sort_by_dirname)
-    tree = {}
-    for folder, files in itertools.groupby(sorted_data, key=_sort_by_dirname):
-        set_node_filelist(tree, Path(folder), list(files))
-
-    return tree
-
-
 def main():
     parser = ArgumentParser(description="View coverage data for a source code tree")
     parser.add_argument("coverage_file", help="a json file generated from the llvm-cov tool")
@@ -147,7 +100,7 @@ def main():
     widget = CoverageView()
     widget.setWindowTitle("Coverage Viewer")
     widget.set_data(coverage_data)
-    widget.resize(800, 600)
+    widget.resize(1027, 768)
     widget.show()
 
     sys.exit(app.exec())

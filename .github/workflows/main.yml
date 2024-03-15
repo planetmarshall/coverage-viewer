@@ -14,12 +14,12 @@ jobs:
 
     - name: Install prerequisites
       run: |
-        python -m install pip --upgrade
-        pip install -r requirements.txt
+        pip install -r requirements.txt --upgrade
 
     - name: Run linter
       run: |
         flake8 view_coverage.py
+        flake8 coverage_tools.py
 
     - name: Run tests
       run: |
