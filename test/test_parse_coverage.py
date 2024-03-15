@@ -1,4 +1,4 @@
-from view_coverage import load_coverage_data
+from coverage_tools import load_coverage_data
 
 import os
 from pathlib import Path
