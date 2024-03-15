@@ -1,26 +1,26 @@
-from view_coverage import parse_coverage_data
+from view_coverage import load_coverage_data
 
-import json
 import os
 from pathlib import Path
 
-def load_data():
-    root_dir = Path(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
-    with open(root_dir / 'test/data/example.json', 'r') as fp:
-        return json.load(fp)
-
 
 def test_parse_coverage():
-    data = load_data()
-    file_tree = parse_coverage_data(data)
+    root_dir = Path(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
+    file_tree = load_coverage_data(root_dir / 'test/data/example.json')
 
     tree = {
-        "folder": "example",
-        "files": "main.cpp",
-        "subfolders": [{
-            "folder": "lib",
-            "files": ["library.cpp"]
-        }]
+        "example" : {
+            "_filenames": [ {
+                "name": "main.cpp",
+                "cpverage": 100
+            }],
+            "lib": {
+                "_filenames": [{
+                "name": "library.cpp",
+                    "coverage": 100
+                }]
+            }
+        }
     }
 
     assert file_tree == tree
