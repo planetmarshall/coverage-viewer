@@ -1,0 +1,8 @@
+test:
+  stage: test
+  script:
+    - python -m venv venv
+    - source venv/bin/activate
+    - pip install -r requirements.txt
+    - flake8 view_coverage.py
+    - python -m test

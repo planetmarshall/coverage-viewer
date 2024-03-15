@@ -1,4 +1,11 @@
 #! /usr/bin/env python
+
+# view_coverage.py
+
+# /// script
+# dependencies = ["jq","pyside6"]
+# ///
+
 from fnmatch import fnmatch
 import itertools
 import os.path
@@ -42,6 +49,7 @@ class CoverageView(QtWidgets.QWidget):
     def color_from_coverage(coverage):
         def clamp(x, min, max):
             return min if x < min else max if x > max else x
+
         index = clamp(floor(coverage * 0.1), 0, 10)
         return QColor(CoverageView.COLORS[index])
 
@@ -70,7 +78,7 @@ class CoverageView(QtWidgets.QWidget):
                         item.addChild(file_item)
 
             mean_coverage = sum_coverage / item.childCount()
-            item.setText(1, f"{mean_coverage :.2f}")
+            item.setText(1, f"{mean_coverage:.2f}")
             item.setBackground(2, self.color_from_coverage(mean_coverage))
             return item, mean_coverage
 
@@ -83,6 +91,7 @@ class CoverageView(QtWidgets.QWidget):
         self.tree.setHeaderLabels(["Name", "Coverage (pct)", "Heat Map"])
         self.tree.addTopLevelItems(root_items)
 
+
 def load_coverage_data(filename: Path) -> dict:
     with open(filename, "r") as fp:
         preprocessed_data = jq.compile(
@@ -90,8 +99,8 @@ def load_coverage_data(filename: Path) -> dict:
         ).input_text(fp.read())
         return parse_coverage_data(preprocessed_data)
 
-def parse_coverage_data(coverage_data: dict, exclude_pattern : str | None = None) -> dict:
 
+def parse_coverage_data(coverage_data: dict, exclude_pattern: str | None = None) -> dict:
     def _prefilter_filenames(files):
         for data in files:
             filename = data["filename"]
@@ -142,6 +151,7 @@ def main():
     widget.show()
 
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()
