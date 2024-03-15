@@ -4,22 +4,46 @@ import itertools
 import os.path
 import sys
 from argparse import ArgumentParser
+from math import floor
 from pathlib import Path
 from typing import List, Tuple
 
 import jq
 from PySide6 import QtWidgets
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QTreeWidgetItem
 
 FILE_DATA_KEY = "_filedata"
 
+
 class CoverageView(QtWidgets.QWidget):
+    COLORS = [
+        '#0c0786',
+        '#40039c',
+        '#6a00a7',
+        '#8f0da3',
+        '#b02a8f',
+        '#cb4777',
+        '#e06461',
+        '#f2844b',
+        '#fca635',
+        '#fcce25',
+        '#eff821'
+    ]
+
     def __init__(self):
         super().__init__()
         self.tree = QtWidgets.QTreeWidget()
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.addWidget(self.tree)
+
+    @staticmethod
+    def color_from_coverage(coverage):
+        def clamp(x, min, max):
+            return min if x < min else max if x > max else x
+        index = clamp(floor(coverage * 0.1), 0, 10)
+        return QColor(CoverageView.COLORS[index])
 
     def set_data(self, data: dict):
         root_items = []
@@ -36,15 +60,18 @@ class CoverageView(QtWidgets.QWidget):
                 else:
                     n = 0
                     for filedata in node[FILE_DATA_KEY]:
-                        sum_coverage += filedata["coverage"]
+                        coverage = filedata["coverage"]
+                        sum_coverage += coverage
                         n += 1
                         file_item = QTreeWidgetItem(item)
                         file_item.setText(0, os.path.basename(filedata["filename"]))
-                        file_item.setText(1, f"{filedata['coverage']:.2f}")
+                        file_item.setText(1, f"{coverage:.2f}")
+                        file_item.setBackground(2, self.color_from_coverage(coverage))
                         item.addChild(file_item)
 
             mean_coverage = sum_coverage / item.childCount()
             item.setText(1, f"{mean_coverage :.2f}")
+            item.setBackground(2, self.color_from_coverage(mean_coverage))
             return item, mean_coverage
 
         for key in data.keys():
@@ -52,8 +79,8 @@ class CoverageView(QtWidgets.QWidget):
                 child_item, coverage = add_tree_node(None, key, data[key])
                 root_items.append(child_item)
 
-        self.tree.setColumnCount(2)
-        self.tree.setHeaderLabels(["Name", "Coverage (pct)"])
+        self.tree.setColumnCount(3)
+        self.tree.setHeaderLabels(["Name", "Coverage (pct)", "Heat Map"])
         self.tree.addTopLevelItems(root_items)
 
 def load_coverage_data(filename: Path) -> dict:
