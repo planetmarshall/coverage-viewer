@@ -1,0 +1,8 @@
+line-length = 120
+
+[lint]
+select = [
+    "E",  # pycodestyle
+    "F",  # pyflakes
+    "B"   # flake8 bugbear
+]

@@ -4,6 +4,5 @@ test:
     - python -m venv venv
     - source venv/bin/activate
     - pip install -r requirements.txt
-    - flake8 view_coverage.py
-    - flake8 coverage_tools.py
-    - python -m pytest test
+    - ruff check ./*.py
+    - python -m test
