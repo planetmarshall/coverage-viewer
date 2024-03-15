@@ -4,12 +4,11 @@ import itertools
 import os.path
 import sys
 from argparse import ArgumentParser
-import json
 from pathlib import Path
 from typing import List, Tuple
 
 import jq
-from PySide6 import QtCore, QtWidgets, QtCore
+from PySide6 import QtWidgets
 from PySide6.QtWidgets import QTreeWidgetItem
 
 FILE_DATA_KEY = "_filedata"
@@ -30,11 +29,11 @@ class CoverageView(QtWidgets.QWidget):
             item.setText(0, key)
             sum_coverage = 0
             for subkey in node.keys():
-                if subkey != "_filedata":
+                if subkey != FILE_DATA_KEY:
                     child, coverage = add_tree_node(item, subkey, node[subkey])
+                    sum_coverage += coverage
                     item.addChild(child)
                 else:
-                    sum_coverage = 0
                     n = 0
                     for filedata in node[FILE_DATA_KEY]:
                         sum_coverage += filedata["coverage"]
@@ -43,10 +42,10 @@ class CoverageView(QtWidgets.QWidget):
                         file_item.setText(0, os.path.basename(filedata["filename"]))
                         file_item.setText(1, f"{filedata['coverage']:.2f}")
                         item.addChild(file_item)
-                    coverage = sum_coverage / n
 
-            item.setText(1, f"{coverage:.2f}")
-            return item, coverage
+            mean_coverage = sum_coverage / item.childCount()
+            item.setText(1, f"{mean_coverage :.2f}")
+            return item, mean_coverage
 
         for key in data.keys():
             if key != FILE_DATA_KEY:

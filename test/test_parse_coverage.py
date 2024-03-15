@@ -9,18 +9,16 @@ def test_parse_coverage():
     file_tree = load_coverage_data(root_dir / 'test/data/example.json')
 
     tree = {
-        "example" : {
-            "_filenames": [ {
-                "name": "main.cpp",
-                "cpverage": 100
+            "_filedata": [ {
+                "filename": "main.cpp",
+                "coverage": 100
             }],
             "lib": {
-                "_filenames": [{
-                "name": "library.cpp",
+                "_filedata": [{
+                "filename": "lib/library.cpp",
                     "coverage": 100
                 }]
             }
         }
-    }
 
     assert file_tree == tree
