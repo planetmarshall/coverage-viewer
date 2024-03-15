@@ -14,8 +14,7 @@ jobs:
 
     - name: Install prerequisites
       run: |
-        python -m install pip --upgrade
-        pip install -r requirements.txt
+        pip install -r requirements.txt --upgrade
 
     - name: Run linter
       run: |
